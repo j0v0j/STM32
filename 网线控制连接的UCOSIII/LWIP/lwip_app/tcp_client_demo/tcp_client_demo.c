@@ -105,7 +105,7 @@ static void tcp_client_thread(void *arg)
 					OS_CRITICAL_EXIT();  //开中断
 					data_len=0;  //复制完成后data_len要清零。
 					Eth_usmart_scan();					
-					printf("TCP date:%s\r\n",tcp_client_recvbuf);
+//					printf("TCP date:%s\r\n",tcp_client_recvbuf);
 					
 					netbuf_delete(recvbuf);
 				}else if(recv_err == ERR_CLSD)  //关闭连接

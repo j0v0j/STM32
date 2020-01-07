@@ -4,6 +4,9 @@
 
 #include "trans_byhand.h"
 
+#include "set_par.h"
+#include "set_f.h"
+
 #define   Z_down        0
 #define   Z_up					plant_init->hz
 /*-----------定义9种苗情况----------------
@@ -39,15 +42,13 @@
 #define 	Right_release()    	rightcan_release()		//右手放苗
 
 
-#include "set_par.h"
-#include "set_f.h"
-
 
 extern struct set__f 			*set_f;
 extern struct plant__init 		*plant_init;
 extern struct xyz__position 	*real_position;
 extern struct dish__init 		*dish_init;
-extern struct plant__rank_one 	*plant_rank_one;
+extern struct plant__rank 	*plant_rank_one;
+extern struct plant__rank 	*plant_rank_two;
 //移栽机运行状态运行或者暂停
 #define Plant_stop   	0
 #define Plant_run    	1
@@ -59,55 +60,68 @@ struct plant__status *plant_status;
 
 struct dish_RC//定义穴盘苗正在移栽的行和列，为全局变量
 {
-    u8 row;
-    u8 col;
+    s8 row;
+    s8 col;
 };
 
 
 struct positionA//定义A点的行列信息，为全局变量
 {
     u16 _x;
-    u16 _y1;
-    u16 _y2;
+    s16 _y1;
+    s16 _y2;
     u16 _z;
 };
 
 
-struct positionB//定义B点的行列信息，为全局变量
-{
-    u16 _z;
-};
+//struct positionB//定义B点的行列信息，为全局变量
+//{
+//    u16 _x;
+//    u16 _y1;
+//    u16 _y2;
+//    u16 _z;
+//};
 
-struct positionC//定义C点的行列信息，为全局变量
-{
-    u16 _x;
+//struct positionC//定义C点的行列信息，为全局变量
+//{
+//    u16 _x;
+//    u16 _y1;
+//    u16 _y2;
+//    u16 _z;
 
-};
+//};
 
-struct positionD//定义D点的行列信息，为全局变量
-{
-    u16 _z;
-};
+//struct positionD//定义D点的行列信息，为全局变量
+//{
+//    u16 _x;
+//    u16 _y1;
+//    u16 _y2;
+//    u16 _z;
+//};
 
-struct positionE//定义E点的行列信息，为全局变量
-{
-    u16 _x;
-    u16 _y1;
-    u16 _y2;
-};
+//struct positionE//定义E点的行列信息，为全局变量
+//{
+//    u16 _x;
+//    u16 _y1;
+//    u16 _y2;
+//    u16 _z;
+//};
 
-struct positionF//定义F点的行列信息，为全局变量
-{
-    u16 _x;
-    u16 _y1;
-    u16 _y2;
-    u16 _z;
-};
+//struct positionF//定义F点的行列信息，为全局变量
+//{
+//    u16 _x;
+//    u16 _y1;
+//    u16 _y2;
+//    u16 _z;
+//};
 
-struct positionG//定义G点的行列信息，为全局变量
-{
-    u16 _z;
-};
+//struct positionG//定义G点的行列信息，为全局变量
+//{
+//    u16 _x;
+//    u16 _y1;
+//    u16 _y2;
+//    u16 _z;
+//};
 
 
 //苗等级接收

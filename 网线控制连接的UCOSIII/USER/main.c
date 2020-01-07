@@ -144,7 +144,7 @@ int main(void)
     delay_init(400);						//延时初始化
     uart_init(115200);						//串口初始化
     uart3_init(115200);						//串口初始化
-
+    PCF8574_Init();                         //初始化PCF8574
     LED_Init();								//初始化LED
     KEY_Init();								//初始化按键
     SDRAM_Init();                   		//初始化SDRAM
@@ -330,7 +330,7 @@ void led_task(void *pdata)
 {
     OS_ERR err;
     u8 i=0;
-		CPU_SR_ALLOC();
+//		CPU_SR_ALLOC();
     while(1)
     {
         if(i++==10)
@@ -338,11 +338,8 @@ void led_task(void *pdata)
             LED0_Toggle;
             i=0;
         }
-				OS_CRITICAL_ENTER();//进入临界区
         usmart_dev.scan();	//执行usmart扫描
         usmart_scan3();
-        OS_CRITICAL_EXIT();	//退出临界区
-
         OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err); //延时500ms
     }
 }
@@ -356,6 +353,7 @@ void mqtt_thread1(void *pdata)
     {
         if(TIM2->CNT==0)  {
             if(flag) {
+								LED1_Toggle;
                 LCD_ShowNum(612,140,PLUS_NUM.number,6,32);
 								sprintf(buf,"{plus:\"%d\"}\r\n",PLUS_NUM.number);
 								HAL_UART_Transmit(&UART3_Handler,(u8 *)buf,strlen(buf),1000);//串口2发送数据
@@ -363,6 +361,7 @@ void mqtt_thread1(void *pdata)
             }
         }
         else  {
+						LED1_Toggle;
             LCD_ShowNum(612,140,TIM2->CNT,6,32);
             flag=1;
             sprintf(buf,"{plus:\"%d\"}\r\n",TIM2->CNT);
