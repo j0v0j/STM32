@@ -133,6 +133,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
 #endif	
 	}
 	
+	
 	if(huart->Instance==USART3)//如果是串口1，进行串口1 MSP初始化
 	{
 		__HAL_RCC_GPIOB_CLK_ENABLE();			//使能GPIOA时钟

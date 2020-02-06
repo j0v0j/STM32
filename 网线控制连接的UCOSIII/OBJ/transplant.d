@@ -121,3 +121,4 @@
 ..\obj\transplant.o: ..\UCOSIII\uC-LIB\lib_math.h
 ..\obj\transplant.o: ..\UCOSIII\UCOS-CONFIG\app_cfg.h
 ..\obj\transplant.o: ..\UCOSIII\UCOS-BSP\bsp.h
+..\obj\transplant.o: ..\HARDWARE\TIMER\timer.h

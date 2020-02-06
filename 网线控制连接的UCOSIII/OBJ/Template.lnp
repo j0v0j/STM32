@@ -1,4 +1,4 @@
---cpu Cortex-M7.fp.dp
+--cpu Cortex-M7 --fpu=SoftVFP
 "..\obj\main.o"
 "..\obj\stm32h7xx_it.o"
 "..\obj\system_stm32h7xx.o"
@@ -42,6 +42,7 @@
 "..\obj\ds18b20.o"
 "..\obj\timer.o"
 "..\obj\fdcan.o"
+"..\obj\exti.o"
 "..\obj\malloc.o"
 "..\obj\bsp.o"
 "..\obj\cpu_c.o"
@@ -116,6 +117,7 @@
 "..\obj\trans_byhand.o"
 "..\obj\set_f.o"
 "..\obj\set_par.o"
+"..\obj\set_io.o"
 --strict --scatter "..\SCRIPT\qspi_code_scf.scf"
 --diag_suppress=6314,6329 --summary_stderr --info summarysizes --map --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

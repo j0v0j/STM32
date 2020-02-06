@@ -452,18 +452,18 @@ ARM Macro Assembler    Page 7
                        *************************************************
   284 00000034         
   285 00000034                 END
-Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M7.fp.dp --apcs=
+Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M7 --fpu=SoftVFP
 
 
 
 ARM Macro Assembler    Page 8 
 
 
-interwork --depend=..\obj\cpu_a.d -o..\obj\cpu_a.o -I.\RTE\_ETHERNET -ID:\softw
-are\MDK5\ARM\PACK\Keil\STM32H7xx_DFP\2.3.0\Drivers\CMSIS\Device\ST\STM32H7xx\In
-clude -ID:\software\MDK5\ARM\CMSIS\Include --predefine="__UVISION_VERSION SETA 
-523" --predefine="STM32H750xx SETA 1" --list=..\obj\cpu_a.lst ..\UCOSIII\uC-CPU
-\ARM-Cortex-M4\IAR\cpu_a.asm
+ --apcs=interwork --depend=..\obj\cpu_a.d -o..\obj\cpu_a.o -I.\RTE\_ETHERNET -I
+D:\software\MDK5\ARM\PACK\Keil\STM32H7xx_DFP\2.3.0\Drivers\CMSIS\Device\ST\STM3
+2H7xx\Include -ID:\software\MDK5\ARM\CMSIS\Include --predefine="__UVISION_VERSI
+ON SETA 523" --predefine="STM32H750xx SETA 1" --list=..\obj\cpu_a.lst ..\UCOSII
+I\uC-CPU\ARM-Cortex-M4\IAR\cpu_a.asm
 
 
 
@@ -557,4 +557,4 @@ Symbol: CPU_WaitForInt
       At line 48 in file ..\UCOSIII\uC-CPU\ARM-Cortex-M4\IAR\cpu_a.asm
 Comment: CPU_WaitForInt used once
 10 symbols
-343 symbols in table
+342 symbols in table

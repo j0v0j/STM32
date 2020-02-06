@@ -40,6 +40,7 @@ void set_F_FA(u16 fa)
 
 void set_F_all(u16 ab,u16 bc,u16 cd,u16 de,u16 ef,u16 fg,u16 gf,u16 fa)
 {
+		set_f->f_ok=1;
     set_F_AB(ab);
     set_F_BC(bc);
     set_F_CD(cd);

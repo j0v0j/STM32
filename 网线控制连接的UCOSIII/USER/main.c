@@ -3,6 +3,7 @@
 #include "usart.h"
 #include "led.h"
 #include "key.h"
+#include "exti.h"
 #include "ltdc.h"
 #include "lcd.h"
 #include "sdram.h"
@@ -10,193 +11,191 @@
 #include "mpu.h"
 #include "timer.h"
 #include "includes.h"
-#include "lwip_comm.h"
-#include "lwip/netif.h"
-#include "ethernetif.h"
-#include "lwipopts.h"
-#include "tcp_client_demo.h"
+//#include "lwip_comm.h"
+//#include "lwip/netif.h"
+//#include "ethernetif.h"
+//#include "lwipopts.h"
+//#include "tcp_client_demo.h"
 #include "mqttclient.h"
 
 //#include "rs485.h"
-//ÒÔÏÂ×Ô¼ºÐÞ¸ÄºóÌí¼ÓµÄÍ·ÎÄ¼þ
+//ï¿½ï¿½ï¿½ï¿½ï¿½Ô¼ï¿½ï¿½Þ¸Äºï¿½ï¿½ï¿½ï¿½Óµï¿½Í·ï¿½Ä¼ï¿½
 
 #include "usmart.h"
 #include "fdcan.h"
-
+#include "set_io.h"
 
 /************************************************
- ALIENTEK ±±¼«ÐÇH750/F750¿ª·¢°å ÍøÂçÊµÑé12
- »ùÓÚNETCONN APIµÄTCP¿Í»§¶ËÊµÑé(UCOSIII°æ±¾)
 
- UCOSIIIÖÐÒÔÏÂÓÅÏÈ¼¶ÓÃ»§³ÌÐò²»ÄÜÊ¹ÓÃ£¬ALIENTEK
- ½«ÕâÐ©ÓÅÏÈ¼¶·ÖÅä¸øÁËUCOSIIIµÄ5¸öÏµÍ³ÄÚ²¿ÈÎÎñ
- ÓÅÏÈ¼¶0£ºÖÐ¶Ï·þÎñ·þÎñ¹ÜÀíÈÎÎñ OS_IntQTask()
- ÓÅÏÈ¼¶1£ºÊ±ÖÓ½ÚÅÄÈÎÎñ OS_TickTask()
- ÓÅÏÈ¼¶2£º¶¨Ê±ÈÎÎñ OS_TmrTask()
- ÓÅÏÈ¼¶OS_CFG_PRIO_MAX-2£ºÍ³¼ÆÈÎÎñ OS_StatTask()
- ÓÅÏÈ¼¶OS_CFG_PRIO_MAX-1£º¿ÕÏÐÈÎÎñ OS_IdleTask()
- ¼¼ÊõÖ§³Ö£ºwww.openedv.com
- ÌÔ±¦µêÆÌ£ºhttp://eboard.taobao.com
- ¹Ø×¢Î¢ÐÅ¹«ÖÚÆ½Ì¨Î¢ÐÅºÅ£º"ÕýµãÔ­×Ó"£¬Ãâ·Ñ»ñÈ¡STM32×ÊÁÏ¡£
- ¹ãÖÝÊÐÐÇÒíµç×Ó¿Æ¼¼ÓÐÏÞ¹«Ë¾
- ×÷Õß£ºÕýµãÔ­×Ó @ALIENTEK
+
 ************************************************/
 
 extern struct PLUS__NUM PLUS_NUM;
-extern TIM_HandleTypeDef TIM_Handle;      //¶¨Ê±Æ÷¾ä±ú
-//KEYÈÎÎñ
+extern TIM_HandleTypeDef TIM_Handle;      
+
 #define KEY_TASK_PRIO 		8
-//ÈÎÎñ¶ÑÕ»´óÐ¡
 #define KEY_STK_SIZE		128
-//ÈÎÎñ¿ØÖÆ¿é
 OS_TCB KeyTaskTCB;
-//ÈÎÎñ¶ÑÕ»
 CPU_STK KEY_TASK_STK[KEY_STK_SIZE];
-//ÈÎÎñº¯Êý
 void key_task(void *pdata);
 
-//LEDÈÎÎñ
-//ÈÎÎñÓÅÏÈ¼¶
-#define LED_TASK_PRIO		9
-//ÈÎÎñ¶ÑÕ»´óÐ¡
-#define LED_STK_SIZE		128
-//ÈÎÎñ¿ØÖÆ¿é
-OS_TCB LedTaskTCB;
-//ÈÎÎñ¶ÑÕ»
-CPU_STK	LED_TASK_STK[LED_STK_SIZE];
-//ÈÎÎñº¯Êý
-void led_task(void *pdata);
 
-//ÔÚLCDÉÏÏÔÊ¾µØÖ·ÐÅÏ¢ÈÎÎñ
-//ÈÎÎñÓÅÏÈ¼¶
+#define usmart__TASK_PRIO		9
+#define usmart_STK_SIZE		128
+OS_TCB usmart_TaskTCB;
+CPU_STK	usmart_TASK_STK[usmart_STK_SIZE];
+void usmart_thread(void *pdata);
+
+//ï¿½ï¿½LCDï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½Ö·ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¼ï¿½
 #define DISPLAY_TASK_PRIO	10
-//ÈÎÎñ¶ÑÕ»´óÐ¡
+//ï¿½ï¿½ï¿½ï¿½ï¿½Õ»ï¿½ï¿½Ð?
 #define DISPLAY_STK_SIZE	128
-//ÈÎÎñ¿ØÖÆ¿é
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¿ï¿?
 OS_TCB DisplayTaskTCB;
-//ÈÎÎñ¶ÑÕ»
+//ï¿½ï¿½ï¿½ï¿½ï¿½Õ?
 CPU_STK	DISPLAY_TASK_STK[DISPLAY_STK_SIZE];
-//ÈÎÎñº¯Êý
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 void display_task(void *pdata);
 
-//STARTÈÎÎñ
-//ÈÎÎñÓÅÏÈ¼¶
+
 #define START_TASK_PRIO		11
-//ÈÎÎñ¶ÑÕ»´óÐ¡
+
 #define START_STK_SIZE		128
-//ÈÎÎñ¶ÑÕ»
+
 OS_TCB StartTaskTCB;
-//ÈÎÎñ¶ÑÕ»
+
 CPU_STK START_TASK_STK[START_STK_SIZE];
-//ÈÎÎñº¯Êý
+
 void start_task(void *pdata);
 
 
-//MQTTÈÎÎñ
-//ÈÎÎñÓÅÏÈ¼¶
-#define MQTT_TASK_PRIO	12
-//ÈÎÎñ¶ÑÕ»´óÐ¡
-#define MQTT_STK_SIZE	128
-//ÈÎÎñ¿ØÖÆ¿é
-OS_TCB MQTTTaskTCB;
-//ÈÎÎñ¶ÑÕ»
-CPU_STK	MQTT_TASK_STK[MQTT_STK_SIZE];
-//ÈÎÎñº¯Êý
-void mqtt_thread1(void *pdata);
+
+#define PLUS_SHOW_PRIO	12
+
+#define PLUS_SHOW_STK_SIZE	128
+
+OS_TCB PLUS_SHOW_TaskTCB;
+
+CPU_STK	PLUS_SHOW_TASK_STK[PLUS_SHOW_STK_SIZE];
+void PLUS_show(void *pdata);
 
 
-//ÔÚLCDÉÏÏÔÊ¾µØÖ·ÐÅÏ¢
-//mode:1 ÏÔÊ¾DHCP»ñÈ¡µ½µÄµØÖ·
-//	  ÆäËû ÏÔÊ¾¾²Ì¬µØÖ·
+
+#define PLUS_SHOW_PRIO	12
+
+#define PLUS_SHOW_STK_SIZE	128
+
+OS_TCB PLUS_SHOW_TaskTCB;
+
+CPU_STK	PLUS_SHOW_TASK_STK[PLUS_SHOW_STK_SIZE];
+void PLUS_show(void *pdata);
+
+
+#define plant_PRIO	13
+
+#define plant_STK_SIZE	128
+
+OS_TCB plant_TaskTCB;
+
+CPU_STK	plant_TASK_STK[plant_STK_SIZE];
+extern void Auto_runing(void *pdata);
+
+
 void show_address(u8 mode)
 {
-    u8 buf[30];
-    if(mode==2)
-    {
-        sprintf((char*)buf,"DHCP IP :%d.%d.%d.%d",lwipdev.ip[0],lwipdev.ip[1],lwipdev.ip[2],lwipdev.ip[3]);						//´òÓ¡¶¯Ì¬IPµØÖ·
-        LCD_ShowString(30,170,210,16,16,buf);
-        sprintf((char*)buf,"DHCP GW :%d.%d.%d.%d",lwipdev.gateway[0],lwipdev.gateway[1],lwipdev.gateway[2],lwipdev.gateway[3]);	//´òÓ¡Íø¹ØµØÖ·
-        LCD_ShowString(30,190,210,16,16,buf);
-        sprintf((char*)buf,"NET MASK:%d.%d.%d.%d",lwipdev.netmask[0],lwipdev.netmask[1],lwipdev.netmask[2],lwipdev.netmask[3]);	//´òÓ¡×ÓÍøÑÚÂëµØÖ·
-        LCD_ShowString(30,210,210,16,16,buf);
-        LCD_ShowString(30,230,210,16,16,"Port:8087!");
-    }
-    else
-    {
-        sprintf((char*)buf,"Static IP:%d.%d.%d.%d",lwipdev.ip[0],lwipdev.ip[1],lwipdev.ip[2],lwipdev.ip[3]);						//´òÓ¡¶¯Ì¬IPµØÖ·
-        LCD_ShowString(30,170,210,16,16,buf);
-        sprintf((char*)buf,"Static GW:%d.%d.%d.%d",lwipdev.gateway[0],lwipdev.gateway[1],lwipdev.gateway[2],lwipdev.gateway[3]);	//´òÓ¡Íø¹ØµØÖ·
-        LCD_ShowString(30,190,210,16,16,buf);
-        sprintf((char*)buf,"NET MASK:%d.%d.%d.%d",lwipdev.netmask[0],lwipdev.netmask[1],lwipdev.netmask[2],lwipdev.netmask[3]);	//´òÓ¡×ÓÍøÑÚÂëµØÖ·
-        LCD_ShowString(30,210,210,16,16,buf);
-        LCD_ShowString(30,230,210,16,16,"Port:8087!");
-    }
+//    u8 buf[30];
+//    if(mode==2)
+//    {
+//        sprintf((char*)buf,"DHCP IP :%d.%d.%d.%d",lwipdev.ip[0],lwipdev.ip[1],lwipdev.ip[2],lwipdev.ip[3]);						//ï¿½ï¿½Ó¡ï¿½ï¿½Ì¬IPï¿½ï¿½Ö·
+//        LCD_ShowString(30,170,210,16,16,buf);
+//        sprintf((char*)buf,"DHCP GW :%d.%d.%d.%d",lwipdev.gateway[0],lwipdev.gateway[1],lwipdev.gateway[2],lwipdev.gateway[3]);	//ï¿½ï¿½Ó¡ï¿½ï¿½ï¿½Øµï¿½Ö·
+//        LCD_ShowString(30,190,210,16,16,buf);
+//        sprintf((char*)buf,"NET MASK:%d.%d.%d.%d",lwipdev.netmask[0],lwipdev.netmask[1],lwipdev.netmask[2],lwipdev.netmask[3]);	//ï¿½ï¿½Ó¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö?
+//        LCD_ShowString(30,210,210,16,16,buf);
+//        LCD_ShowString(30,230,210,16,16,(u8 *)"Port:8087!");
+//    }
+//    else
+//    {
+//        sprintf((char*)buf,"Static IP:%d.%d.%d.%d",lwipdev.ip[0],lwipdev.ip[1],lwipdev.ip[2],lwipdev.ip[3]);						//ï¿½ï¿½Ó¡ï¿½ï¿½Ì¬IPï¿½ï¿½Ö·
+//        LCD_ShowString(30,170,210,16,16,buf);
+//        sprintf((char*)buf,"Static GW:%d.%d.%d.%d",lwipdev.gateway[0],lwipdev.gateway[1],lwipdev.gateway[2],lwipdev.gateway[3]);	//ï¿½ï¿½Ó¡ï¿½ï¿½ï¿½Øµï¿½Ö·
+//        LCD_ShowString(30,190,210,16,16,buf);
+//        sprintf((char*)buf,"NET MASK:%d.%d.%d.%d",lwipdev.netmask[0],lwipdev.netmask[1],lwipdev.netmask[2],lwipdev.netmask[3]);	//ï¿½ï¿½Ó¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö?
+//        LCD_ShowString(30,210,210,16,16,buf);
+//        LCD_ShowString(30,230,210,16,16,(u8 *)"Port:8087!");
+//    }
 }
 
 int main(void)
 {
     OS_ERR err;
     CPU_SR_ALLOC();
-    Cache_Enable();                			//´ò¿ªL1-Cache
+    Cache_Enable();                			//ï¿½ï¿½L1-Cache
     Write_Through();
-    HAL_Init();				        		//³õÊ¼»¯HAL¿â
-    Stm32_Clock_Init(160,5,2,4);  		    //ÉèÖÃÊ±ÖÓ,400Mhz
-    delay_init(400);						//ÑÓÊ±³õÊ¼»¯
-    uart_init(115200);						//´®¿Ú³õÊ¼»¯
-    uart3_init(115200);						//´®¿Ú³õÊ¼»¯
-    PCF8574_Init();                         //³õÊ¼»¯PCF8574
-    LED_Init();								//³õÊ¼»¯LED
-    KEY_Init();								//³õÊ¼»¯°´¼ü
-    SDRAM_Init();                   		//³õÊ¼»¯SDRAM
-    MPU_Memory_Protection();		//±£»¤Ïà¹Ø´æ´¢ÇøÓò
-    LCD_Init();								//³õÊ¼»¯LCD
-    usmart_init(200); 			//³õÊ¼»¯USMART
-    FDCAN1_Mode_Init(22,1,5,3,FDCAN_MODE_NORMAL);        //Õý³£Ä£Ê½,²¨ÌØÂÊ1Mbps
+    HAL_Init();				        		//ï¿½ï¿½Ê¼ï¿½ï¿½HALï¿½ï¿½
+    Stm32_Clock_Init(160,5,2,4);  		    //ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½,400Mhz
+    delay_init(400);						//ï¿½ï¿½Ê±ï¿½ï¿½Ê¼ï¿½ï¿½
+    uart_init(115200);						//ï¿½ï¿½ï¿½Ú³ï¿½Ê¼ï¿½ï¿½
+    uart3_init(115200);						//ï¿½ï¿½ï¿½Ú³ï¿½Ê¼ï¿½ï¿½
+    PCF8574_Init();                         //ï¿½ï¿½Ê¼ï¿½ï¿½PCF8574
+    LED_Init();								//ï¿½ï¿½Ê¼ï¿½ï¿½LED
+//    KEY_Init();								//ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    REY_io_init();//³õÊ¼»¯¼ÌµçÆ÷IO¿Ú
+    EXTI_Init();					//ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½â²¿ï¿½Ð¶ï¿½ï¿½ï¿½ï¿½ï¿½
+    SDRAM_Init();                   		//ï¿½ï¿½Ê¼ï¿½ï¿½SDRAM
+    MPU_Memory_Protection();		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø´æ´?ï¿½ï¿½ï¿½ï¿½
+    LCD_Init();								//ï¿½ï¿½Ê¼ï¿½ï¿½LCD
+    usmart_init(200); 			//ï¿½ï¿½Ê¼ï¿½ï¿½USMART
+    PWM_gpio();
+    FDCAN1_Mode_Init(22,1,5,3,FDCAN_MODE_NORMAL);        //ï¿½ï¿½ï¿½ï¿½Ä£Ê½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1Mbps
     POINT_COLOR=RED;
-    LCD_ShowString(30,50,200,16,16,"POLARIS H750/F750");
-    LCD_ShowString(30,70,200,16,16,"TCP Client UCOSIII Test");
-    LCD_ShowString(30,90,200,16,16,"ATOM@ALIENTEK");
-    LCD_ShowString(30,110,200,16,16,"2019/5/13");
+    LCD_ShowString(30,50,200,16,16,(u8 *)"POLARIS H750/F750");
+    LCD_ShowString(30,70,200,16,16,(u8 *)"TCP Client UCOSIII Test");
+    LCD_ShowString(30,90,200,16,16,(u8 *)"ATOM@ALIENTEK");
+    LCD_ShowString(30,110,200,16,16,(u8 *)"2019/5/13");
     TIM8_Init(1000);
     TIM2_Init();
-    OSInit(&err); 					//UCOSIII³õÊ¼»¯
-    while(lwip_comm_init()) 		//lwip³õÊ¼»¯
-    {
-        LCD_ShowString(30,110,200,20,16,"Lwip Init failed!"); 	//lwip³õÊ¼»¯Ê§°Ü
-        delay_ms(500);
-        LCD_Fill(30,110,230,150,WHITE);
-        delay_ms(500);
-    }
-    LCD_ShowString(30,110,200,20,16,"Lwip Init Success!"); 		//lwip³õÊ¼»¯³É¹¦
-    while(tcp_client_init()) 									//³õÊ¼»¯tcpclient_demo(´´½¨tcpclient_demoÏß³Ì)
-    {
-        LCD_ShowString(30,150,200,20,16,"TCP Client failed!!"); //tcpclient´´½¨Ê§°Ü
-        delay_ms(500);
-        LCD_Fill(30,150,230,170,WHITE);
-        delay_ms(500);
-    }
-    LCD_ShowString(30,150,200,20,16,"TCP Client Success!"); 	//tcpclient´´½¨³É¹¦
+    OSInit(&err); 					//UCOSIIIï¿½ï¿½Ê¼ï¿½ï¿½
+		
+//    while(lwip_comm_init()) 		//lwipï¿½ï¿½Ê¼ï¿½ï¿½
+//    {    
+//				printf("lwip_comm_init()=%d\r\n",lwip_comm_init()) ;
+//        LCD_ShowString(30,110,200,20,16,(u8 *)"Lwip Init failed!"); 	//lwipï¿½ï¿½Ê¼ï¿½ï¿½Ê§ï¿½ï¿½
+//        delay_ms(500);
+//        LCD_Fill(30,110,230,150,WHITE);
+//        delay_ms(500);
+//    }
+//    LCD_ShowString(30,110,200,20,16,(u8 *)"Lwip Init Success!"); 		//lwipï¿½ï¿½Ê¼ï¿½ï¿½ï¿½É¹ï¿½
+//    while(tcp_client_init()) 									//ï¿½ï¿½Ê¼ï¿½ï¿½tcpclient_demo(ï¿½ï¿½ï¿½ï¿½tcpclient_demoï¿½ß³ï¿½)
+//    {
+//        LCD_ShowString(30,150,200,20,16,(u8 *)"TCP Client failed!!"); //tcpclientï¿½ï¿½ï¿½ï¿½Ê§ï¿½ï¿½
+//        delay_ms(500);
+//        LCD_Fill(30,150,230,170,WHITE);
+//        delay_ms(500);
+//    }
+//    LCD_ShowString(30,150,200,20,16,(u8 *)"TCP Client Success!"); 	//tcpclientï¿½ï¿½ï¿½ï¿½ï¿½É¹ï¿½
 
-    OS_CRITICAL_ENTER();//½øÈëÁÙ½çÇøx
-    //´´½¨¿ªÊ¼ÈÎÎñ
-    OSTaskCreate((OS_TCB 	* )&StartTaskTCB,		//ÈÎÎñ¿ØÖÆ¿é
-                 (CPU_CHAR	* )"start task", 		//ÈÎÎñÃû×Ö
-                 (OS_TASK_PTR )start_task, 			//ÈÎÎñº¯Êý
-                 (void		* )0,					//´«µÝ¸øÈÎÎñº¯ÊýµÄ²ÎÊý
-                 (OS_PRIO	  )START_TASK_PRIO,     //ÈÎÎñÓÅÏÈ¼¶
-                 (CPU_STK   * )&START_TASK_STK[0],	//ÈÎÎñ¶ÑÕ»»ùµØÖ·
-                 (CPU_STK_SIZE)START_STK_SIZE/10,	//ÈÎÎñ¶ÑÕ»Éî¶ÈÏÞÎ»
-                 (CPU_STK_SIZE)START_STK_SIZE,		//ÈÎÎñ¶ÑÕ»´óÐ¡
-                 (OS_MSG_QTY  )0,					//ÈÎÎñÄÚ²¿ÏûÏ¢¶ÓÁÐÄÜ¹»½ÓÊÕµÄ×î´óÏûÏ¢ÊýÄ¿,Îª0Ê±½ûÖ¹½ÓÊÕÏûÏ¢
-                 (OS_TICK	  )0,					//µ±Ê¹ÄÜÊ±¼äÆ¬ÂÖ×ªÊ±µÄÊ±¼äÆ¬³¤¶È£¬Îª0Ê±ÎªÄ¬ÈÏ³¤¶È£¬
-                 (void   	* )0,					//ÓÃ»§²¹³äµÄ´æ´¢Çø
-                 (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR, //ÈÎÎñÑ¡Ïî
-                 (OS_ERR 	* )&err);				//´æ·Å¸Ãº¯Êý´íÎóÊ±µÄ·µ»ØÖµ
-    OS_CRITICAL_EXIT();	//ÍË³öÁÙ½çÇø
-    OSStart(&err); 		//¿ªÆôUCOS
+    OS_CRITICAL_ENTER();//ï¿½ï¿½ï¿½ï¿½ï¿½Ù½ï¿½ï¿½ï¿½x
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½
+    OSTaskCreate((OS_TCB 	* )&StartTaskTCB,		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¿ï¿?
+                 (CPU_CHAR	* )"start task", 		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+                 (OS_TASK_PTR )start_task, 			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+                 (void		* )0,					//ï¿½ï¿½ï¿½Ý¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä²ï¿½ï¿½ï¿½
+                 (OS_PRIO	  )START_TASK_PRIO,     //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¼ï¿½
+                 (CPU_STK   * )&START_TASK_STK[0],	//ï¿½ï¿½ï¿½ï¿½ï¿½Õ»ï¿½ï¿½ï¿½ï¿½Ö?
+                 (CPU_STK_SIZE)START_STK_SIZE/10,	//ï¿½ï¿½ï¿½ï¿½ï¿½Õ»ï¿½ï¿½ï¿½ï¿½ï¿½Î»
+                 (CPU_STK_SIZE)START_STK_SIZE,		//ï¿½ï¿½ï¿½ï¿½ï¿½Õ»ï¿½ï¿½Ð?
+                 (OS_MSG_QTY  )0,					//ï¿½ï¿½ï¿½ï¿½ï¿½Ú²ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½ï¿½Ü¹ï¿½ï¿½ï¿½ï¿½Õµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï?ï¿½ï¿½Ä¿,Îª0Ê±ï¿½ï¿½Ö¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
+                 (OS_TICK	  )0,					//ï¿½ï¿½Ê¹ï¿½ï¿½Ê±ï¿½ï¿½Æ¬ï¿½ï¿½×ªÊ±ï¿½ï¿½Ê±ï¿½ï¿½Æ¬ï¿½ï¿½ï¿½È£ï¿½Îª0Ê±ÎªÄ¬ï¿½Ï³ï¿½ï¿½È£ï¿½
+                 (void   	* )0,					//ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½Ä´æ´?ï¿½ï¿½
+                 (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR, //ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½
+                 (OS_ERR 	* )&err);				//ï¿½ï¿½Å¸Ãºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½Ä·ï¿½ï¿½ï¿½Ö?
+    OS_CRITICAL_EXIT();	//ï¿½Ë³ï¿½ï¿½Ù½ï¿½ï¿½ï¿½
+    OSStart(&err); 		//ï¿½ï¿½ï¿½ï¿½UCOS
 }
 
-//startÈÎÎñ
+//startï¿½ï¿½ï¿½ï¿½
 void start_task(void *p_arg)
 {
     OS_ERR err;
@@ -205,38 +204,38 @@ void start_task(void *p_arg)
 
     CPU_Init();
 #if OS_CFG_STAT_TASK_EN > 0u
-    OSStatTaskCPUUsageInit(&err);  	//Í³¼ÆÈÎÎñ
+    OSStatTaskCPUUsageInit(&err);  	//Í³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 #endif
 
-#ifdef CPU_CFG_INT_DIS_MEAS_EN		//Èç¹ûÊ¹ÄÜÁË²âÁ¿ÖÐ¶Ï¹Ø±ÕÊ±¼ä
+#ifdef CPU_CFG_INT_DIS_MEAS_EN		//ï¿½ï¿½ï¿½Ê¹ï¿½ï¿½ï¿½Ë²ï¿½ï¿½ï¿½ï¿½Ð¶Ï¹Ø±ï¿½Ê±ï¿½ï¿?
     CPU_IntDisMeasMaxCurReset();
 #endif
 
-#if	OS_CFG_SCHED_ROUND_ROBIN_EN  //µ±Ê¹ÓÃÊ±¼äÆ¬ÂÖ×ªµÄÊ±ºò
-    //Ê¹ÄÜÊ±¼äÆ¬ÂÖ×ªµ÷¶È¹¦ÄÜ,Ê±¼äÆ¬³¤¶ÈÎª1¸öÏµÍ³Ê±ÖÓ½ÚÅÄ£¬¼È1*5=5ms
+#if	OS_CFG_SCHED_ROUND_ROBIN_EN  //ï¿½ï¿½Ê¹ï¿½ï¿½Ê±ï¿½ï¿½Æ¬ï¿½ï¿½×ªï¿½ï¿½Ê±ï¿½ï¿½
+    //Ê¹ï¿½ï¿½Ê±ï¿½ï¿½Æ¬ï¿½ï¿½×ªï¿½ï¿½ï¿½È¹ï¿½ï¿½ï¿½,Ê±ï¿½ï¿½Æ¬ï¿½ï¿½ï¿½ï¿½Îª1ï¿½ï¿½ÏµÍ³Ê±ï¿½Ó½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½1*5=5ms
     OSSchedRoundRobinCfg(DEF_ENABLED,1,&err);
 #endif
 
 #if LWIP_DHCP
-    lwip_comm_dhcp_creat(); //´´½¨DHCPÈÎÎñ
+//    lwip_comm_dhcp_creat(); //ï¿½ï¿½ï¿½ï¿½DHCPï¿½ï¿½ï¿½ï¿½
 #endif
 //	mqtt_thread_init();
-    OS_CRITICAL_ENTER();	//½øÈëÁÙ½çÇø
-    //´´½¨LEDÈÎÎñ
-    OSTaskCreate((OS_TCB 	* )&LedTaskTCB,
+    OS_CRITICAL_ENTER();	//ï¿½ï¿½ï¿½ï¿½ï¿½Ù½ï¿½ï¿½ï¿½
+    //ï¿½ï¿½ï¿½ï¿½LEDï¿½ï¿½ï¿½ï¿½
+    OSTaskCreate((OS_TCB 	* )&usmart_TaskTCB,
                  (CPU_CHAR	* )"led0 task",
-                 (OS_TASK_PTR )led_task,
+                 (OS_TASK_PTR )usmart_thread,
                  (void		* )0,
-                 (OS_PRIO	  )LED_TASK_PRIO,
-                 (CPU_STK   * )&LED_TASK_STK[0],
-                 (CPU_STK_SIZE)LED_STK_SIZE/10,
-                 (CPU_STK_SIZE)LED_STK_SIZE,
+                 (OS_PRIO	  )usmart__TASK_PRIO,
+                 (CPU_STK   * )&usmart_TASK_STK[0],
+                 (CPU_STK_SIZE)usmart_STK_SIZE/10,
+                 (CPU_STK_SIZE)usmart_STK_SIZE,
                  (OS_MSG_QTY  )0,
                  (OS_TICK	  )0,
                  (void   	* )0,
                  (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR,
                  (OS_ERR 	* )&err);
-    //´´½¨KEYÈÎÎñ
+    //ï¿½ï¿½ï¿½ï¿½KEYï¿½ï¿½ï¿½ï¿½
     OSTaskCreate((OS_TCB 	* )&KeyTaskTCB,
                  (CPU_CHAR	* )"key task",
                  (OS_TASK_PTR )key_task,
@@ -250,125 +249,161 @@ void start_task(void *p_arg)
                  (void   	* )0,
                  (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR,
                  (OS_ERR 	* )&err);
-    //´´½¨ÏÔÊ¾ÈÎÎñ
-    OSTaskCreate((OS_TCB 	* )&DisplayTaskTCB,
-                 (CPU_CHAR	* )"display task",
-                 (OS_TASK_PTR )display_task,
-                 (void		* )0,
-                 (OS_PRIO	  )DISPLAY_TASK_PRIO,
-                 (CPU_STK   * )&DISPLAY_TASK_STK[0],
-                 (CPU_STK_SIZE)DISPLAY_STK_SIZE/10,
-                 (CPU_STK_SIZE)DISPLAY_STK_SIZE,
-                 (OS_MSG_QTY  )0,
-                 (OS_TICK	  )0,
-                 (void   	* )0,
-                 (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR,
-                 (OS_ERR 	* )&err);
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½
+//    OSTaskCreate((OS_TCB 	* )&DisplayTaskTCB,
+//                 (CPU_CHAR	* )"display task",
+//                 (OS_TASK_PTR )display_task,
+//                 (void		* )0,
+//                 (OS_PRIO	  )DISPLAY_TASK_PRIO,
+//                 (CPU_STK   * )&DISPLAY_TASK_STK[0],
+//                 (CPU_STK_SIZE)DISPLAY_STK_SIZE/10,
+//                 (CPU_STK_SIZE)DISPLAY_STK_SIZE,
+//                 (OS_MSG_QTY  )0,
+//                 (OS_TICK	  )0,
+//                 (void   	* )0,
+//                 (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR,
+//                 (OS_ERR 	* )&err);
 
-    //´´½¨MQTTÈÎÎñ
-    OSTaskCreate(  (OS_TCB 	  * )&MQTTTaskTCB,
-                   (CPU_CHAR	* )"mqtt task",
-                   (OS_TASK_PTR )mqtt_thread1,
+    //ï¿½ï¿½ï¿½ï¿½MQTTï¿½ï¿½ï¿½ï¿½
+    OSTaskCreate(  (OS_TCB 	  * )&PLUS_SHOW_TaskTCB,
+                   (CPU_CHAR	* )"PLUS_SHOW",
+                   (OS_TASK_PTR )PLUS_show,
                    (void		  * )0,
-                   (OS_PRIO	    )MQTT_TASK_PRIO,
-                   (CPU_STK   * )&MQTT_TASK_STK[0],
-                   (CPU_STK_SIZE)MQTT_STK_SIZE/10,
-                   (CPU_STK_SIZE)MQTT_STK_SIZE,
+                   (OS_PRIO	    )PLUS_SHOW_PRIO,
+                   (CPU_STK   * )&PLUS_SHOW_TASK_STK[0],
+                   (CPU_STK_SIZE)PLUS_SHOW_STK_SIZE/10,
+                   (CPU_STK_SIZE)PLUS_SHOW_STK_SIZE,
                    (OS_MSG_QTY  )0,
                    (OS_TICK	    )0,
                    (void   	  * )0,
                    (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR,
                    (OS_ERR 	  * )&err);
-
-    OS_TaskSuspend((OS_TCB*)&StartTaskTCB,&err);		//¹ÒÆð¿ªÊ¼ÈÎÎñ
-    OS_CRITICAL_EXIT();	//ÍË³öÁÙ½çÇø
+									 
+									 
+									 
+									 
+   OSTaskCreate(  (OS_TCB 	  * )&plant_TaskTCB,
+                   (CPU_CHAR	* )"Auto_runing",
+                   (OS_TASK_PTR )Auto_runing,
+                   (void		  * )0,
+                   (OS_PRIO	    )plant_PRIO,
+                   (CPU_STK   * )&plant_TASK_STK[0],
+                   (CPU_STK_SIZE)plant_STK_SIZE/10,
+                   (CPU_STK_SIZE)plant_STK_SIZE,
+                   (OS_MSG_QTY  )0,
+                   (OS_TICK	    )0,
+                   (void   	  * )0,
+                   (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR,
+                   (OS_ERR 	  * )&err);
+									 								 
+									 
+    OS_TaskSuspend((OS_TCB*)&StartTaskTCB,&err);		//ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½
+    OS_CRITICAL_EXIT();	//ï¿½Ë³ï¿½ï¿½Ù½ï¿½ï¿½ï¿½
 }
 
-//ÏÔÊ¾µØÖ·µÈÐÅÏ¢
+//ï¿½ï¿½Ê¾ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½Ï¢
 void display_task(void *pdata)
 {
     OS_ERR err;
 
     while(1)
     {
-#if LWIP_DHCP									//µ±¿ªÆôDHCPµÄÊ±ºò
-        if(lwipdev.dhcpstatus != 0) 			//¿ªÆôDHCP
-        {
-            show_address(lwipdev.dhcpstatus );	//ÏÔÊ¾µØÖ·ÐÅÏ¢
-            OS_TaskSuspend((OS_TCB*)&DisplayTaskTCB,&err);		//¹ÒÆð×ÔÉíÈÎÎñ
-        }
-#else
-        show_address(0); 						//ÏÔÊ¾¾²Ì¬µØÖ·
-        OS_TaskSuspend((OS_TCB*)&DisplayTaskTCB,&err);		//¹ÒÆð×ÔÉíÈÎÎñ
-#endif //LWIP_DHCP
-        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err); //ÑÓÊ±500ms
+//#if LWIP_DHCP									//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½DHCPï¿½ï¿½Ê±ï¿½ï¿½
+//        if(lwipdev.dhcpstatus != 0) 			//ï¿½ï¿½ï¿½ï¿½DHCP
+//        {
+//            show_address(lwipdev.dhcpstatus );	//ï¿½ï¿½Ê¾ï¿½ï¿½Ö·ï¿½ï¿½Ï¢
+//            OS_TaskSuspend((OS_TCB*)&DisplayTaskTCB,&err);		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//        }
+//#else
+//        show_address(0); 						//ï¿½ï¿½Ê¾ï¿½ï¿½Ì¬ï¿½ï¿½Ö·
+//        OS_TaskSuspend((OS_TCB*)&DisplayTaskTCB,&err);		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//#endif //LWIP_DHCP
+        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err); //ï¿½ï¿½Ê±500ms
     }
 }
 
-//keyÈÎÎñ
-void key_task(void *pdata)
+//keyï¿½ï¿½ï¿½ï¿½
+void key_task(void *pdata)   //ï¿½ï¿½ï¿½ï¿½É¨ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ñ´¥·ï¿½ï¿½ï¿½Êµï¿½ï¿½Ö´ï¿½ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½ï¿½ï¿½
 {
     u8 key;
     OS_ERR err;
-		u8 buf[9]= {'w','c','h','l','o','v','e','\r','\n'};
+    u8 buf[9]= {'k','e','y','l','o','v','e','\r','\n'};
     while(1)
     {
-        key = KEY_Scan(0);
-       switch(key)
-			 {
-				 case KEY1_PRES:
-					  
-            HAL_UART_Transmit(&UART3_Handler,buf,9,1000);//´®¿Ú2·¢ËÍÊý¾Ý			 
-			 
-			 }
-        OSTimeDlyHMSM(0,0,0,10,OS_OPT_TIME_HMSM_STRICT,&err); //ÑÓÊ±10ms
+        key = KEY_Scan(1);
+        if(key==KEY0_PRES)
+        {
+            sprintf((char *)buf,"{\"k\":%d}\r\n",key);
+            HAL_UART_Transmit(&UART3_Handler,buf,sizeof(buf),1000);//ï¿½ï¿½ï¿½ï¿½2ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+            printf("%s",buf);
+        }
+        if(key==KEY1_PRES)
+        {
+            sprintf((char *)buf,"{\"k\":%d}\r\n",key);
+            HAL_UART_Transmit(&UART3_Handler,buf,sizeof(buf),1000);//ï¿½ï¿½ï¿½ï¿½2ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+            printf("%s",buf);
+        }
+        if(key==KEY2_PRES)
+        {
+            sprintf((char *)buf,"{\"k\":%d}\r\n",key);
+            HAL_UART_Transmit(&UART3_Handler,buf,sizeof(buf),1000);//ï¿½ï¿½ï¿½ï¿½2ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+
+            printf("%s",buf);
+        }
+
+
+        OSTimeDlyHMSM(0,0,0,1,OS_OPT_TIME_HMSM_STRICT,&err); //ï¿½ï¿½Ê±10ms
     }
 }
 
-//ledÈÎÎñ
-void led_task(void *pdata)
+//ledï¿½ï¿½ï¿½ï¿½
+void usmart_thread(void *pdata)
 {
     OS_ERR err;
     u8 i=0;
 //		CPU_SR_ALLOC();
     while(1)
     {
-        if(i++==10)
+        if(i++==20)
         {
             LED0_Toggle;
             i=0;
         }
-        usmart_dev.scan();	//Ö´ÐÐusmartÉ¨Ãè
+        usmart_dev.scan();	//Ö´ï¿½ï¿½usmartÉ¨ï¿½ï¿½
         usmart_scan3();
-        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err); //ÑÓÊ±500ms
+        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err); //ï¿½ï¿½Ê±500ms
     }
 }
-void mqtt_thread1(void *pdata)
+void PLUS_show(void *pdata)
 {
     OS_ERR err;
-		u8 flag=1;
-		char buf[20];
-    LCD_ShowString(330,140,256,32,32,"PLUS_NUM.number=");
+    u8 flag=1;
+    char buf[20];
+		u8 i=0;
+    LCD_ShowString(330,140,256,32,32,(u8*)"PLUS_NUM.number=");
     while(1)
     {
         if(TIM2->CNT==0)  {
             if(flag) {
-								LED1_Toggle;
+                LED1_Toggle;
                 LCD_ShowNum(612,140,PLUS_NUM.number,6,32);
-								sprintf(buf,"{plus:\"%d\"}\r\n",PLUS_NUM.number);
-								HAL_UART_Transmit(&UART3_Handler,(u8 *)buf,strlen(buf),1000);//´®¿Ú2·¢ËÍÊý¾Ý
-                flag=0;							
+                sprintf(buf,"{plus:\"%d\"}\r\n",PLUS_NUM.number);
+                HAL_UART_Transmit(&UART3_Handler,(u8 *)buf,strlen(buf),1000);//ï¿½ï¿½ï¿½ï¿½2ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+                flag=0;
+								i=0;
             }
         }
         else  {
-						LED1_Toggle;
+            LED1_Toggle;
             LCD_ShowNum(612,140,TIM2->CNT,6,32);
             flag=1;
+//						i+=100;
+//						TIM2->PSC= 199+i;
             sprintf(buf,"{plus:\"%d\"}\r\n",TIM2->CNT);
-            HAL_UART_Transmit(&UART3_Handler,(u8 *)buf,strlen(buf),1000);//´®¿Ú2·¢ËÍÊý¾Ý
+            HAL_UART_Transmit(&UART3_Handler,(u8 *)buf,strlen(buf),1000);//ï¿½ï¿½ï¿½ï¿½2ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         }
 
-        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err); //ÑÓÊ±500ms
+        OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err); //ï¿½ï¿½Ê±500ms
 
     }
 }

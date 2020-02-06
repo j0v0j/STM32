@@ -137,7 +137,7 @@
           </Flash1>
           <bUseTDR>1</bUseTDR>
           <Flash2>BIN\UL2CM3.DLL</Flash2>
-          <Flash3></Flash3>
+          <Flash3>"" ()</Flash3>
           <Flash4></Flash4>
           <pFcarmOut></pFcarmOut>
           <pFcarmGrp></pFcarmGrp>
@@ -182,7 +182,7 @@
             <hadIRAM>1</hadIRAM>
             <hadXRAM>0</hadXRAM>
             <uocXRam>0</uocXRam>
-            <RvdsVP>3</RvdsVP>
+            <RvdsVP>1</RvdsVP>
             <hadIRAM2>1</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
@@ -335,7 +335,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER, STM32H750xx</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\USER;..\USMART;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\HALLIB\STM32H7xx_HAL_Driver\Inc;..\MALLOC;..\HARDWARE\LED;..\HARDWARE\KEY;..\HARDWARE\MPU;..\HARDWARE\LCD;..\HARDWARE\SDRAM;..\HARDWARE\RTC;..\HARDWARE\24CXX;..\HARDWARE\IIC;..\HARDWARE\PCF8574;..\HARDWARE\USART2;..\HARDWARE\TIMER;..\HARDWARE\LAN8720;..\UCOSIII\uC-LIB;..\UCOSIII\uC-CPU;..\UCOSIII\UCOS-BSP;..\UCOSIII\UCOS-CONFIG;..\UCOSIII\uCOS-III\Source;..\UCOSIII\uC-CPU\ARM-Cortex-M4\RealView;..\UCOSIII\uC-LIB\Ports\ARM-Cortex-M4\RealView;..\UCOSIII\uCOS-III\Ports\ARM-Cortex-M4\Generic\RealView;..\LWIP;..\LWIP\arch;..\LWIP\lwip-1.4.1\src\include;..\LWIP\lwip-1.4.1\src\include\ipv4;..\LWIP\lwip-1.4.1\src\include\netif;..\LWIP\lwip_app\lwip_comm;..\LWIP\lwip_app\udp_demo;..\LWIP\lwip_app\tcp_client_demo;..\USMART;..\TRANSPLANT;..\MQTT;..\cJSON;..\HARDWARE\DS18B20;..\HARDWARE\FDCAN;..\HARDWARE\RS485</IncludePath>
+              <IncludePath>..\CORE;..\USER;..\USMART;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\HALLIB\STM32H7xx_HAL_Driver\Inc;..\MALLOC;..\HARDWARE\LED;..\HARDWARE\KEY;..\HARDWARE\MPU;..\HARDWARE\LCD;..\HARDWARE\SDRAM;..\HARDWARE\RTC;..\HARDWARE\24CXX;..\HARDWARE\IIC;..\HARDWARE\PCF8574;..\HARDWARE\USART2;..\HARDWARE\TIMER;..\HARDWARE\LAN8720;..\UCOSIII\uC-LIB;..\UCOSIII\uC-CPU;..\UCOSIII\UCOS-BSP;..\UCOSIII\UCOS-CONFIG;..\UCOSIII\uCOS-III\Source;..\UCOSIII\uC-CPU\ARM-Cortex-M4\RealView;..\UCOSIII\uC-LIB\Ports\ARM-Cortex-M4\RealView;..\UCOSIII\uCOS-III\Ports\ARM-Cortex-M4\Generic\RealView;..\LWIP;..\LWIP\arch;..\LWIP\lwip-1.4.1\src\include;..\LWIP\lwip-1.4.1\src\include\ipv4;..\LWIP\lwip-1.4.1\src\include\netif;..\LWIP\lwip_app\lwip_comm;..\LWIP\lwip_app\udp_demo;..\LWIP\lwip_app\tcp_client_demo;..\USMART;..\TRANSPLANT;..\MQTT;..\cJSON;..\HARDWARE\DS18B20;..\HARDWARE\FDCAN;..\HARDWARE\RS485;..\HARDWARE\EXTI</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -628,6 +628,11 @@
               <FileName>fdcan.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\FDCAN\fdcan.c</FilePath>
+            </File>
+            <File>
+              <FileName>exti.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\EXTI\exti.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1108,6 +1113,11 @@
               <FileName>set_par.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\TRANSPLANT\set_par.c</FilePath>
+            </File>
+            <File>
+              <FileName>set_io.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\TRANSPLANT\set_io.c</FilePath>
             </File>
           </Files>
         </Group>

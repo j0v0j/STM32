@@ -443,12 +443,12 @@ ARM Macro Assembler    Page 7
   309 00000220         
   310 00000220         
   311 00000220                 END
-Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M7.fp.dp --apcs=
-interwork --depend=..\obj\lib_mem_a.d -o..\obj\lib_mem_a.o -I.\RTE\_ETHERNET -I
-D:\software\MDK5\ARM\PACK\Keil\STM32H7xx_DFP\2.3.0\Drivers\CMSIS\Device\ST\STM3
-2H7xx\Include -ID:\software\MDK5\ARM\CMSIS\Include --predefine="__UVISION_VERSI
-ON SETA 523" --predefine="STM32H750xx SETA 1" --list=..\obj\lib_mem_a.lst ..\UC
-OSIII\uC-LIB\Ports\ARM-Cortex-M4\IAR\lib_mem_a.asm
+Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M7 --fpu=SoftVFP
+ --apcs=interwork --depend=..\obj\lib_mem_a.d -o..\obj\lib_mem_a.o -I.\RTE\_ETH
+ERNET -ID:\software\MDK5\ARM\PACK\Keil\STM32H7xx_DFP\2.3.0\Drivers\CMSIS\Device
+\ST\STM32H7xx\Include -ID:\software\MDK5\ARM\CMSIS\Include --predefine="__UVISI
+ON_VERSION SETA 523" --predefine="STM32H750xx SETA 1" --list=..\obj\lib_mem_a.l
+st ..\UCOSIII\uC-LIB\Ports\ARM-Cortex-M4\IAR\lib_mem_a.asm
 
 
 
@@ -674,4 +674,4 @@ sm
 sm
 
 18 symbols
-351 symbols in table
+350 symbols in table

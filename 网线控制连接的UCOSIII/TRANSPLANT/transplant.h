@@ -32,6 +32,8 @@
 #define 	G_case  			6
 #define 	H_case  			7
 #define 	I_case  			8
+
+
 #define 	M_rank				wait_rank()
 #define   clear_rank()	plant_init->rank=9
 
@@ -50,13 +52,15 @@ extern struct dish__init 		*dish_init;
 extern struct plant__rank 	*plant_rank_one;
 extern struct plant__rank 	*plant_rank_two;
 //移栽机运行状态运行或者暂停
+
 #define Plant_stop   	0
 #define Plant_run    	1
+
 struct plant__status
 {
-    u8 stop_or_run;		//初始时的HZ
-} plant__status= {Plant_stop};
-struct plant__status *plant_status;
+    u8 stop_or_run;
+    u8 init;
+};
 
 struct dish_RC//定义穴盘苗正在移栽的行和列，为全局变量
 {
@@ -65,7 +69,7 @@ struct dish_RC//定义穴盘苗正在移栽的行和列，为全局变量
 };
 
 
-struct positionA//定义A点的行列信息，为全局变量
+struct position//定义点的行列信息，为全局变量
 {
     u16 _x;
     s16 _y1;
@@ -73,55 +77,6 @@ struct positionA//定义A点的行列信息，为全局变量
     u16 _z;
 };
 
-
-//struct positionB//定义B点的行列信息，为全局变量
-//{
-//    u16 _x;
-//    u16 _y1;
-//    u16 _y2;
-//    u16 _z;
-//};
-
-//struct positionC//定义C点的行列信息，为全局变量
-//{
-//    u16 _x;
-//    u16 _y1;
-//    u16 _y2;
-//    u16 _z;
-
-//};
-
-//struct positionD//定义D点的行列信息，为全局变量
-//{
-//    u16 _x;
-//    u16 _y1;
-//    u16 _y2;
-//    u16 _z;
-//};
-
-//struct positionE//定义E点的行列信息，为全局变量
-//{
-//    u16 _x;
-//    u16 _y1;
-//    u16 _y2;
-//    u16 _z;
-//};
-
-//struct positionF//定义F点的行列信息，为全局变量
-//{
-//    u16 _x;
-//    u16 _y1;
-//    u16 _y2;
-//    u16 _z;
-//};
-
-//struct positionG//定义G点的行列信息，为全局变量
-//{
-//    u16 _x;
-//    u16 _y1;
-//    u16 _y2;
-//    u16 _z;
-//};
 
 
 //苗等级接收
@@ -135,7 +90,7 @@ void planting_stop(void);
 void planting_start(void);
 void planting_restart(void);
 void planting_ERR(void);
-
+void Auto_runing(void *pdata);
 
 #endif
 

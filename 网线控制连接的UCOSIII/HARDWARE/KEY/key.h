@@ -20,8 +20,8 @@
 #define WK_UP       HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0)  //WKUP按键PA0
 
 #define KEY0_PRES 	1  	//KEY0按下后返回值
-#define KEY1_PRES	2	//KEY1按下后返回值
-#define KEY2_PRES	3	//KEY2按下后返回值
+#define KEY1_PRES		2	//KEY1按下后返回值
+#define KEY2_PRES		3	//KEY2按下后返回值
 #define WKUP_PRES   4	//WKUP按下后返回值
 
 void KEY_Init(void);  //按键IO初始化函数

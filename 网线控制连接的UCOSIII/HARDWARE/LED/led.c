@@ -26,6 +26,6 @@ void LED_Init(void)
     HAL_GPIO_Init(GPIOB,&GPIO_Initure);     		//≥ı ºªØGPIOB.0∫ÕGPIOB.1
 	
     HAL_GPIO_WritePin(GPIOB,GPIO_PIN_0,GPIO_PIN_SET);	//PB0÷√0
-	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_1,GPIO_PIN_SET);	//PB1÷√1 
+		HAL_GPIO_WritePin(GPIOB,GPIO_PIN_1,GPIO_PIN_SET);	//PB1÷√1 
 }
 

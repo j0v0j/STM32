@@ -3,6 +3,7 @@
 #include 	"sys.h"
 struct set__f
 {
+		u8  f_ok;
     u16 AB;			//AB¶ÎÆµÂÊ
     u16 BC;			//BC¶ÎÆµÂÊ
     u16 CD;			//CD¶ÎÆµÂÊ

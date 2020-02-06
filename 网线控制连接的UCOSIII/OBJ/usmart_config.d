@@ -103,3 +103,10 @@
 ..\obj\usmart_config.o: ..\HARDWARE\LCD\ltdc.h
 ..\obj\usmart_config.o: ..\HARDWARE\TIMER\timer.h
 ..\obj\usmart_config.o: ..\HARDWARE\FDCAN\fdcan.h
+..\obj\usmart_config.o: ..\TRANSPLANT\transplant.h
+..\obj\usmart_config.o: ..\TRANSPLANT\trans_byhand.h
+..\obj\usmart_config.o: ..\TRANSPLANT\set_par.h
+..\obj\usmart_config.o: ..\TRANSPLANT\set_f.h
+..\obj\usmart_config.o: ..\TRANSPLANT\set_io.h
+..\obj\usmart_config.o: ..\TRANSPLANT\set_io.h
+..\obj\usmart_config.o: ..\HARDWARE\EXTI\exti.h

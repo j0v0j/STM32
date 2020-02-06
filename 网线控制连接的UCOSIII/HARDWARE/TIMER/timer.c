@@ -59,7 +59,7 @@ void PWM_gpio()
 		GPIO_InitTypeDef GPIO_InitStruct;
     
     ADVANCE_TIM_CHx_CLK();
-    ADVANCE_TIM_CHxN_CLK();
+//    ADVANCE_TIM_CHxN_CLK();
     ADVANCE_TIM_BKIN_CLK();
   
     GPIO_InitStruct.Pin =  ADVANCE_TIM_CHx_PIN2| ADVANCE_TIM_CHx_PIN3;
@@ -69,8 +69,8 @@ void PWM_gpio()
     GPIO_InitStruct.Alternate = GPIO_AF3_TIM8;
     HAL_GPIO_Init(ADVANCE_TIM_CHx_PORT, &GPIO_InitStruct);
 		
-    GPIO_InitStruct.Pin = ADVANCE_TIM_CHxN_PIN;
-    HAL_GPIO_Init(ADVANCE_TIM_CHxN_PORT, &GPIO_InitStruct);
+//    GPIO_InitStruct.Pin = ADVANCE_TIM_CHxN_PIN;
+//    HAL_GPIO_Init(ADVANCE_TIM_CHxN_PORT, &GPIO_InitStruct);
   
     GPIO_InitStruct.Pin = ADVANCE_TIM_BKIN_PIN;
     HAL_GPIO_Init(ADVANCE_TIM_BKIN_PORT, &GPIO_InitStruct);   
@@ -82,13 +82,14 @@ void PWM_gpio()
 */
 static void set_TIM8_HZ(u16 HZ)
 {
+		PLUS_NUM.HZ= 1000000/HZ - 1;
 		//TIMx的外设寄存器基地址
     TIM_Handle.Instance = ADVANCE_TIM;
     //计数模式为向上计数，递增
     TIM_Handle.Init.CounterMode = TIM_COUNTERMODE_UP;
     /* 累计 TIM_Period个后产生一个更新或者中断*/		
     //当定时器从0计数到9999，即为10000次，为一个定时周期
-    TIM_Handle.Init.Period = 1000000/HZ - 1;
+    TIM_Handle.Init.Period = PLUS_NUM.HZ;
     //时钟不分频，即一个TIM_CLK时钟计1次
     TIM_Handle.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
     //定时器时钟源TIMxCLK = 2 * PCLK1  
@@ -128,7 +129,7 @@ void TIM8_Init(u16 HZ)
     //CHx的有效电平为高电平
     sConfig.OCPolarity = TIM_OCNPOLARITY_LOW;
     //CHx在空闲状态下为低电平
-    sConfig.OCIdleState = TIM_OCNIDLESTATE_SET;
+    sConfig.OCIdleState = TIM_OCNIDLESTATE_RESET;
     //CHxN在空闲状态下为高电平(必须与CHx相反)
 //    sConfig.OCNIdleState = TIM_OCIDLESTATE_RESET;
     //CHxN的有效电平为高电平

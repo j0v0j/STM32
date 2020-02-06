@@ -25,14 +25,10 @@ extern TIM_HandleTypeDef TIM2_Handler;      //定时器句柄
 //TIM通道CH1的引脚宏定义
 #define ADVANCE_TIM_CHx_CLK()             __GPIOC_CLK_ENABLE()
 #define ADVANCE_TIM_CHx_PORT              GPIOC
-#define ADVANCE_TIM_CHx_PIN               GPIO_PIN_6
+//#define ADVANCE_TIM_CHx_PIN               GPIO_PIN_6
 #define ADVANCE_TIM_CHx_PIN2              GPIO_PIN_7
 #define ADVANCE_TIM_CHx_PIN3              GPIO_PIN_8
 
-//TIM通道CH1N的引脚宏定义
-#define ADVANCE_TIM_CHxN_CLK()            __GPIOA_CLK_ENABLE()
-#define ADVANCE_TIM_CHxN_PORT             GPIOA 
-#define ADVANCE_TIM_CHxN_PIN              GPIO_PIN_5
 //TIM引脚BKIN宏定义
 #define ADVANCE_TIM_BKIN_CLK()            __GPIOA_CLK_ENABLE()
 #define ADVANCE_TIM_BKIN_PORT             GPIOA 
@@ -44,6 +40,7 @@ struct PLUS__NUM
 	
 	u32 number;
 	u8  stop_flag;
+	u16 HZ;
 
 };
 
